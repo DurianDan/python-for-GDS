@@ -1,23 +1,30 @@
 # create a dictionary from fasta files
-FASTA_file = open(input("what is the file: "))
+'''FASTA_file = open(input("what is the file: "))
+'''
+FASTA_file = open("dna.example.fasta")
 FASTA = FASTA_file.read().split("\n")
 FASTA_file.close()
 while '' in FASTA:
     FASTA.remove('')
-dic = {}
+FASTA_dict= {}
 for line in FASTA:
     if line[0]== '>':
         space = line.index(" ")
         name = line[1:space]
-        dic[name] = ''
-    else:
-        dic[list(dic.keys())[-1]] = dic[list(dic.keys())[-1]] +' '+ line
+        FASTA_dict[name] = list()
+    value = FASTA_dict[list(FASTA_dict.keys())[-1]]
+    if list(FASTA_dict.keys())[-1] not in line:
+        value = value.append(line)
 
+#each sequence in each record is a class Sequence
 class Sequence:
-    def __init__(self,record,seq,n):
+    def __init__(self,record,seq,n,order):
         self.seq = seq
         self.repeats_len = n
         self.record = record
+        self.order = order
+    def order_in_record(self):
+        return self.order
     def get_name(self):
         return self.record
     def get_length(self):
@@ -31,9 +38,12 @@ class Sequence:
             if start_num-1 != i:
                 ORF.append(codon)
             if i+4 == len(self.seq):
-                ORF.append(self.seq[i]+self.seq[i+1]+self.seq[i+2])  
-        if "ATG" in ORF:
-            return "".join(ORF[ORF.index("ATG"):])
+                ORF.append(self.seq[i]+self.seq[i+1]+self.seq[i+2])
+        if len(''.join(ORF)) == self.seq-start_num-1:
+            return "There's not stop codon"   
+        elif "ATG" in ORF:
+            ORF = "".join(ORF[ORF.index("ATG"):])
+            return [len(ORF),self.seq.index("ATG"),ORF] 
         else:
             return "There's not start codon"
     def get_repeats(self):
@@ -59,4 +69,37 @@ class Sequence:
                 dict_max_occ.update({i:max_occ_rate})
         return dict_max_occ
 
-print(dic)
+#create multiple Sequence objects stored in class_sequences
+class_sequences = []
+repeats_length = input("What is the length of each repeats:")
+for record in FASTA_dict:
+    order = 0
+    for sequence in FASTA_dict[record]:
+        order += 1
+        class_sequences.append(Sequence(record,sequence,repeats_length,order))
+
+#get the max length of multiple unprocessed sequences
+def compare_length(minormax,seqorORF):
+    minormax = input("min or max ?: ")
+    seqorORF = input("seq(seqence) or ORF ?: ")
+    #create a dictionary uncompared_lengths = (key:value) = (seq or ORF:lenghth of the key)
+    uncompared_lengths = {}
+    for obj in class_sequences:
+        length = 0
+        if seqorORF == "seq":
+            length = obj.get_length()
+        elif seqorORF == "ORF" and type(obj.get_ORF()) == list :
+            length = obj.get_ORF()[0] 
+        uncompared_lengths.update({obj.get_name()+"__"+str(obj.order_in_record())+"__":length})
+    #create a variable (compared_lengths) with max or min value in the dictionary (uncompared_lengths) 
+    if minormax == "min":
+        compared_length = min(list(uncompared_lengths.values()))
+    elif minormax == "max":
+        compared_length = max(list(uncompared_lengths.values()))
+    compared_lengths = {}
+    #get the key with max or min value
+    for length in uncompared_lengths:
+        if uncompared_lengths[length] == compared_length:
+            compared_lengths.update({length:uncompared_lengths[length]})
+    return compared_lengths
+ 
