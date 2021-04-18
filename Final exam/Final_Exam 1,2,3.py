@@ -39,9 +39,7 @@ class Sequence:
                 ORF.append(codon)
             if i+4 == len(self.seq):
                 ORF.append(self.seq[i]+self.seq[i+1]+self.seq[i+2])
-        if len(''.join(ORF)) == self.seq-start_num-1:
-            return "There's not stop codon"   
-        elif "ATG" in ORF:
+        if "ATG" in ORF:
             ORF = "".join(ORF[ORF.index("ATG"):])
             return [len(ORF),self.seq.index("ATG"),ORF] 
         else:
@@ -79,18 +77,22 @@ for record in FASTA_dict:
         class_sequences.append(Sequence(record,sequence,repeats_length,order))
 
 #get the max length of multiple unprocessed sequences
-def compare_length(minormax,seqorORF):
+def compare_length():
     minormax = input("min or max ?: ")
     seqorORF = input("seq(seqence) or ORF ?: ")
+    if seqorORF == "ORF":
+        start_num = int(input("ORF 1 or 2 or 3 ?: "))
     #create a dictionary uncompared_lengths = (key:value) = (seq or ORF:lenghth of the key)
     uncompared_lengths = {}
     for obj in class_sequences:
         length = 0
         if seqorORF == "seq":
             length = obj.get_length()
-        elif seqorORF == "ORF" and type(obj.get_ORF()) == list :
-            length = obj.get_ORF()[0] 
-        uncompared_lengths.update({obj.get_name()+"__"+str(obj.order_in_record())+"__":length})
+        elif seqorORF == "ORF" and type(obj.get_ORF(start_num)) == list :
+            length = obj.get_ORF(start_num)[0]
+        if length != 0:
+            uncompared_lengths.update({obj.get_name()+"__"+str(obj.order_in_record())+"__":length})
+    #delete all keys with value 0, because those sequences don't have ORF
     #create a variable (compared_lengths) with max or min value in the dictionary (uncompared_lengths) 
     if minormax == "min":
         compared_length = min(list(uncompared_lengths.values()))
@@ -102,4 +104,4 @@ def compare_length(minormax,seqorORF):
         if uncompared_lengths[length] == compared_length:
             compared_lengths.update({length:uncompared_lengths[length]})
     return compared_lengths
- 
+    
