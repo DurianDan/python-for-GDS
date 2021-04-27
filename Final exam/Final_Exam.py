@@ -1,7 +1,7 @@
 # create a dictionary from fasta files
 '''FASTA_file = open(input("what is the file: "))
 '''
-FASTA_file = open("dna.example.fasta")
+FASTA_file = open("/home/duriandan/learning/genomic data science/python for GDS/Final exam/dna2.fasta")
 FASTA = FASTA_file.read().split("\n")
 FASTA_file.close()
 while '' in FASTA:
@@ -76,6 +76,20 @@ for record in FASTA_dict:
         order += 1
         class_sequences.append(Sequence(record,sequence,repeats_length,order))
 
+length_record = {}
+for key in FASTA_dict:
+    length = 0
+    for i in FASTA_dict[key]:
+        length+= len(i)
+    length_record[key] = length
+
+def get_max_length_record():
+    maxi = max(list(length_record.values()))
+    maxdict = {}
+    for i in length_record:
+        if length_record[i] == maxi:
+            maxdict[i] == maxi
+    return maxdict
 #get the max length of multiple unprocessed sequences
 def compare_length():
     minormax = input("min or max ?: ")
@@ -104,4 +118,6 @@ def compare_length():
         if uncompared_lengths[length] == compared_length:
             compared_lengths.update({length:uncompared_lengths[length]})
     return compared_lengths
-    
+
+print(get_max_length_record()3
+)
